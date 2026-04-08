@@ -8,7 +8,8 @@ export function middleware(request: NextRequest) {
   const isInternalRoute =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/usuarios') ||
-    pathname.startsWith('/projetos')
+    pathname.startsWith('/projetos') ||
+    pathname.startsWith('/tarefas')
 
   const isLoginRoute = pathname.startsWith('/login')
 
@@ -24,5 +25,11 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/usuarios/:path*', '/projetos/:path*', '/login'],
+  matcher: [
+    '/dashboard/:path*',
+    '/usuarios/:path*',
+    '/projetos/:path*',
+    '/tarefas/:path*',
+    '/login',
+  ],
 }
