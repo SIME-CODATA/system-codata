@@ -29,4 +29,23 @@ export class TaskRepo {
     const docs = await TaskModel.find().sort({ createdAt: -1 })
     return docs.map(toTask)
   }
+
+  async findById(id: string) {
+    await connectMongo()
+    const doc = await TaskModel.findById(id)
+    return doc ? toTask(doc) : null
+  }
+
+  async update(
+    id: string,
+    data: Partial<Omit<Task, 'id' | 'createdAt' | 'updatedAt'>>
+  ) {
+    await connectMongo()
+
+    const updated = await TaskModel.findByIdAndUpdate(id, data, {
+      new: true,
+    })
+
+    return updated ? toTask(updated) : null
+  }
 }

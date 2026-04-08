@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 type TaskRow = {
   id: string
   title: string
@@ -30,6 +32,7 @@ export function TaskTable({ tasks }: Props) {
             <th align="left">Status</th>
             <th align="left">Prioridade</th>
             <th align="left">Prazo</th>
+            <th align="left">Ações</th>
           </tr>
         </thead>
 
@@ -48,6 +51,9 @@ export function TaskTable({ tasks }: Props) {
                 {task.dueDate
                   ? new Date(task.dueDate).toLocaleDateString('pt-BR')
                   : '-'}
+              </td>
+              <td>
+                <Link href={`/tarefas/${task.id}`}>Editar</Link>
               </td>
             </tr>
           ))}
