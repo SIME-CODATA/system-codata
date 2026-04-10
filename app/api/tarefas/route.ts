@@ -17,11 +17,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
   }
 
+  const { searchParams } = new URL(request.url)
+
   const taskRepo = new TaskRepo()
   const projectRepo = new ProjectRepo()
   const userRepo = new UserRepo()
 
-  const tasks = await listTasks(taskRepo, projectRepo, userRepo)
+  const tasks = await listTasks(taskRepo, projectRepo, userRepo, {
+    status: (searchParams.get('status') as
+      | 'pendente'
+      | 'emAndamento'
+      | 'concluida'
+      | 'bloqueada'
+      | 'cancelada'
+      | null) || undefined,
+    priority: (searchParams.get('priority') as
+      | 'baixa'
+      | 'media'
+      | 'alta'
+      | 'urgente'
+      | null) || undefined,
+    projectId: searchParams.get('projectId') || undefined,
+    assigneeId: searchParams.get('assigneeId') || undefined,
+  })
 
   return NextResponse.json(tasks)
 }

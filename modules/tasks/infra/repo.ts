@@ -1,8 +1,15 @@
 import { connectMongo } from '@/core/database/mongo'
 import { TaskModel } from './schema'
-import type { Task } from '@/modules/tasks/domain/task'
+import type { Task, TaskPriority, TaskStatus } from '@/modules/tasks/domain/task'
 
-function toTask(doc: any): Task {
+type ListTaskFilters = {
+  status?: TaskStatus
+  priority?: TaskPriority
+  projectId?: string
+  assigneeId?: string
+}
+
+function toTask(doc: typeof TaskModel.prototype): Task {
   return {
     id: doc._id.toString(),
     title: doc.title,
@@ -24,9 +31,28 @@ export class TaskRepo {
     return toTask(created)
   }
 
-  async list() {
+  async list(filters?: ListTaskFilters) {
     await connectMongo()
-    const docs = await TaskModel.find().sort({ createdAt: -1 })
+
+    const query: Record<string, unknown> = {}
+
+    if (filters?.status) {
+      query.status = filters.status
+    }
+
+    if (filters?.priority) {
+      query.priority = filters.priority
+    }
+
+    if (filters?.projectId) {
+      query.projectId = filters.projectId
+    }
+
+    if (filters?.assigneeId) {
+      query.assigneeId = filters.assigneeId
+    }
+
+    const docs = await TaskModel.find(query).sort({ createdAt: -1 })
     return docs.map(toTask)
   }
 

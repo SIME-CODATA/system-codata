@@ -12,10 +12,30 @@ type TaskRow = {
   priority: string
   dueDate: Date | null
   createdAt: Date
+  isOverdue: boolean
 }
 
 type Props = {
   tasks: TaskRow[]
+}
+
+function getStatusLabel(status: string, isOverdue: boolean) {
+  if (isOverdue) return 'Atrasada'
+
+  switch (status) {
+    case 'pendente':
+      return 'Pendente'
+    case 'emAndamento':
+      return 'Em andamento'
+    case 'concluida':
+      return 'Concluída'
+    case 'bloqueada':
+      return 'Bloqueada'
+    case 'cancelada':
+      return 'Cancelada'
+    default:
+      return status
+  }
 }
 
 export function TaskTable({ tasks }: Props) {
@@ -38,19 +58,50 @@ export function TaskTable({ tasks }: Props) {
 
         <tbody>
           {tasks.map((task) => (
-            <tr key={task.id}>
+            <tr
+              key={task.id}
+              style={
+                task.isOverdue
+                  ? { backgroundColor: '#fff1f2' }
+                  : undefined
+              }
+            >
               <td>
                 <strong>{task.title}</strong>
                 <div>{task.description}</div>
               </td>
               <td>{task.projectName}</td>
               <td>{task.assigneeName}</td>
-              <td>{task.status}</td>
+              <td>
+                <span
+                  style={
+                    task.isOverdue
+                      ? {
+                          color: '#b91c1c',
+                          fontWeight: 700,
+                        }
+                      : undefined
+                  }
+                >
+                  {getStatusLabel(task.status, task.isOverdue)}
+                </span>
+              </td>
               <td>{task.priority}</td>
               <td>
-                {task.dueDate
-                  ? new Date(task.dueDate).toLocaleDateString('pt-BR')
-                  : '-'}
+                <span
+                  style={
+                    task.isOverdue
+                      ? {
+                          color: '#b91c1c',
+                          fontWeight: 700,
+                        }
+                      : undefined
+                  }
+                >
+                  {task.dueDate
+                    ? new Date(task.dueDate).toLocaleDateString('pt-BR')
+                    : '-'}
+                </span>
               </td>
               <td>
                 <Link href={`/tarefas/${task.id}`}>Editar</Link>
