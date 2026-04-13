@@ -20,6 +20,7 @@ const userSchema = new Schema(
     },
     jobTitle: { type: String, required: true, trim: true },
     isActive: { type: Boolean, default: true },
+    externalCalendarUrl: { type: String, default: null, trim: true }, 
   },
   { timestamps: true }
 )
