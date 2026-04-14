@@ -27,3 +27,7 @@ export type CreateUserInput = {
   role: UserRole
   jobTitle: string
 }
+
+export type UpdateUserInput = Partial<CreateUserInput> & {
+  isActive?: boolean
+}
