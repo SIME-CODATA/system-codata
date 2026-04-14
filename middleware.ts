@@ -9,7 +9,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/usuarios') ||
     pathname.startsWith('/projetos') ||
-    pathname.startsWith('/tarefas')
+    pathname.startsWith('/tarefas') ||
+    pathname.startsWith('/avisos')
 
   const isLoginRoute = pathname.startsWith('/login')
 
@@ -30,6 +31,7 @@ export const config = {
     '/usuarios/:path*',
     '/projetos/:path*',
     '/tarefas/:path*',
+    '/avisos/:path*',
     '/login',
   ],
 }
