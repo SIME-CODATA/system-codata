@@ -15,6 +15,19 @@ export type User = {
   role: UserRole
   jobTitle: string
   isActive: boolean
+  externalCalendarUrl?: string | null
   createdAt: Date
   updatedAt: Date
+}
+
+export type CreateUserInput = {
+  name: string
+  email: string
+  password: string
+  role: UserRole
+  jobTitle: string
+}
+
+export type UpdateUserInput = Partial<CreateUserInput> & {
+  isActive?: boolean
 }

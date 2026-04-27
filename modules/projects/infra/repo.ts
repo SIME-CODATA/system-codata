@@ -2,7 +2,7 @@ import { connectMongo } from '@/core/database/mongo'
 import { ProjectModel } from './schema'
 import type { Project } from '@/modules/projects/domain/project'
 
-function toProject(doc: any): Project {
+function toProject(doc: typeof ProjectModel.prototype): Project {
   return {
     id: doc._id.toString(),
     name: doc.name,
@@ -30,5 +30,14 @@ export class ProjectRepo {
     await connectMongo()
     const docs = await ProjectModel.find().sort({ createdAt: -1 })
     return docs.map(toProject)
+  }
+
+  async update(id: string, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt'>>) {
+    await connectMongo()
+    const updated = await ProjectModel.findByIdAndUpdate(id, data, { new: true })
+    if (!updated) {
+      throw new Error('Projeto não encontrado.')
+    }
+    return toProject(updated)
   }
 }

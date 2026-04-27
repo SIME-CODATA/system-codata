@@ -1,26 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Astloch:wght@400;700&display=swap');
 @import "tailwindcss";
 
+/* ========================================================= */
+/* 1. CONFIGURAÇÃO DO TAILWIND V4 */
+/* ========================================================= */
+@theme {
+  --color-background:       var(--bg-base);
+  --color-surface:          var(--bg-surface);
+  --color-primary:          var(--primary-base);
+  --color-primary-hover:    var(--primary-hover);
+  --color-foreground:       var(--text-base);
+  --color-muted:            var(--text-muted);
+
+  --font-sans: var(--font-primary), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ========================================================= */
+/* 2. PADRÃO: LIGHT STEEL (SEMPRE NO TOPO!) */
+/* ========================================================= */
 :root {
-  --background: #ffffff;
-  --foreground: #929292;
+  --color-1: #f8f9fa;
+  --color-2: #e9ecef;
+  --color-3: #dee2e6;
+  --color-4: #ced4da;
+  --color-5: #adb5bd;
+  --color-6: #6c757d;
+  --color-7: #495057;
+  --color-8: #343a40;
+  --color-9: #212529;
+
+  /* LIGHT */
+  --bg-base: var(--color-1);
+  --bg-surface: var(--color-2);
+  --primary-base: var(--color-8);
+  --primary-hover: var(--color-9);
+  --text-base: var(--color-9);
+  --text-muted: var(--color-6);
+
+  --font-primary: 'Familjen Grotesk', sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root.dark {
+  --bg-base: var(--color-8);
+  --bg-surface: var(--color-9);
+  --primary-base: var(--color-5);
+  --primary-hover: var(--color-4);
+  --text-base: var(--color-1);
+  --text-muted: var(--color-4);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #7e7e7e;
-    --foreground: #ededed;
-  }
+/* ========================================================= */
+/* 3. TEMAS (Usando :root.theme-nome para maior prioridade) */
+/* ========================================================= */
+
+/* 🌙 VIVID NIGHTFALL */
+:root.theme-vivid-nightfall {
+  --color-1: #10002b;
+  --color-2: #240046;
+  --color-3: #3c096c;
+  --color-4: #5a189a;
+  --color-5: #7b2cbf;
+  --color-6: #9d4edd;
+  --color-7: #c77dff;
+  --color-8: #e0aaff;
+  --color-9: #ffffff;
+
+  --bg-base: var(--color-9);
+  --bg-surface: var(--color-7);
+  --primary-base: var(--color-8);
+  --primary-hover: var(--color-6);
+  --text-base: var(--color-1);
+  --text-muted: var(--color-3);
+}
+
+:root.theme-vivid-nightfall.dark {
+  --bg-base: var(--color-3);
+  --bg-surface: var(--color-1);
+  --primary-base: var(--color-6);
+  --primary-hover: var(--color-7);
+  --text-base: var(--color-9);
+  --text-muted: var(--color-8);
+}
+
+/* 🔴 RED GRADIENT */
+:root.theme-red-gradient {
+  --color-1: #641220;
+  --color-2: #6e1423;
+  --color-3: #85182a;
+  --color-4: #a11d33;
+  --color-5: #a71e34;
+  --color-6: #b21e35;
+  --color-7: #bd1f36;
+  --color-8: #c71f37;
+  --color-9: #da1e37;
+  --color-10: #e01e37;
+
+  --bg-base: #fff5f5;
+  --bg-surface: var(--color-7);
+  --primary-base: var(--color-2);
+  --primary-hover: var(--color-10);
+  --text-base: #2a0a0a;
+  --text-muted: #350000;
+}
+
+:root.theme-red-gradient.dark {
+  --bg-base: #350000;
+  --bg-surface: var(--color-1);
+  --primary-base: var(--color-9);
+  --primary-hover: var(--color-10);
+  --text-base: #ffffff;
+  --text-muted: #ffb3b3;
+}
+
+/* 🌊 COASTAL BLUES */
+:root.theme-coastal-blues {
+  --color-1: #012a4a;
+  --color-2: #013a63;
+  --color-3: #01497c;
+  --color-4: #014f86;
+  --color-5: #2a6f97;
+  --color-6: #2c7da0;
+  --color-7: #468faf;
+  --color-8: #61a5c2;
+  --color-9: #89c2d9;
+  --color-10: #a9d6e5;
+
+  --bg-base: #dbedf3;
+  --bg-surface: var(--color-8);
+  --primary-base: var(--color-6);
+  --primary-hover: var(--color-7);
+  --text-base: var(--color-1);
+  --text-muted: var(--color-5);
+}
+
+:root.theme-coastal-blues.dark {
+  --bg-base: var(--color-3);
+  --bg-surface: var(--color-1);
+  --primary-base: var(--color-7);
+  --primary-hover: var(--color-9);
+  --text-base: #ffffff;
+  --text-muted: var(--color-10);
+}
+
+
+/* 🌱 FRESH GREENS */
+:root.theme-fresh-greens {
+  --color-1: #d8f3dc;
+  --color-2: #b7e4c7;
+  --color-3: #95d5b2;
+  --color-4: #74c69d;
+  --color-5: #52b788;
+  --color-6: #40916c;
+  --color-7: #2d6a4f;
+  --color-8: #1b4332;
+  --color-9: #081c15;
+
+  --bg-base: var(--color-1);
+  --bg-surface: var(--color-2);
+  --primary-base: var(--color-9);
+  --primary-hover: var(--color-8);
+  --text-base: var(--color-9);
+  --text-muted: var(--color-7);
+}
+
+:root.theme-fresh-greens.dark {
+  --bg-base: var(--color-9);
+  --bg-surface: var(--color-8);
+  --primary-base: var(--color-5);
+  --primary-hover: var(--color-4);
+  --text-base: var(--color-1);
+  --text-muted: var(--color-2);
+}
+
+/* 🌸 PINK OMBRE */
+:root.theme-pink-ombre {
+  --color-1: #ff0a54;
+  --color-2: #ff477e;
+  --color-3: #ff5c8a;
+  --color-4: #ff7096;
+  --color-5: #ff85a1;
+  --color-6: #ff99ac;
+  --color-7: #fbb1bd;
+  --color-8: #f9bec7;
+  --color-9: #f7cad0;
+  --color-10: #fae0e4;
+
+  --bg-base: #faf0f2;
+  --bg-surface: var(--color-9);
+  --primary-base: var(--color-1);
+  --primary-hover: var(--color-2);
+  --text-base: #590d22;
+  --text-muted: var(--color-4);
+}
+
+:root.theme-pink-ombre.dark {
+  --bg-base: #3a0f1d;
+  --bg-surface: #2a0a14;
+  --primary-base: var(--color-2);
+  --primary-hover: var(--color-3);
+  --text-base: #ffffff;
+  --text-muted: var(--color-6);
+}
+
+/* ========================================================= */
+/* 4. FONTES DINÂMICAS */
+/* ========================================================= */
+:root.font-familjen { --font-primary: 'Familjen Grotesk', sans-serif; }
+:root.font-inter { --font-primary: 'Inter', sans-serif; }
+:root.font-montserrat { --font-primary: 'Montserrat', sans-serif; }
+:root.font-open-sans { --font-primary: 'Open Sans', sans-serif; }
+:root.font-bitcount { --font-primary: 'Bitcount Grid Double', monospace; }
+:root.font-lavishly { --font-primary: 'Lavishly Yours', cursive; }
+:root.font-astloch { --font-primary: 'Astloch', cursive; }
+
+/* ========================================================= */
+/* 5. GLOBAIS E TRANSIÇÕES */
+/* ========================================================= */
+html {
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-base);
+  font-family: var(--font-primary);
+  transition: background-color 0.5s ease, color 0.5s ease; 
 }
