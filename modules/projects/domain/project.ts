@@ -1,9 +1,12 @@
 export const PROJECT_STATUS = [
-  'naoIniciado',
+  'pendente',
   'emAndamento',
-  'pausado',
   'concluido',
+  'pausado',
+  'bloqueada',
   'cancelado',
+  'atrasado',
+  'naoIniciado',
 ] as const
 
 export const PROJECT_PRIORITY = [
