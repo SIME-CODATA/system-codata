@@ -1,0 +1,82 @@
+services:
+  # ---------------------------------------------------
+  # 1. TRAEFIK (Proxy Reverso e SSL Automático)
+  # ---------------------------------------------------
+  traefik:
+    image: "traefik:v3.1"
+    container_name: "traefik"
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.certificadofront.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.certificadofront.acme.httpchallenge=true"
+      - "--certificatesresolvers.certificadofront.acme.httpchallenge.entrypoint=web"
+      # 👇 COLOQUE AQUI O EMAIL DO TI DA PREFEITURA PARA AVISOS DO SSL
+      - "--certificatesresolvers.certificadofront.acme.email=suporte.ti@prefeitura.sp.gov.br"
+      - "--certificatesresolvers.certificadofront.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    volumes:
+      - "traefik-data:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - codata-net
+
+  # ---------------------------------------------------
+  # 2. BANCO DE DADOS (MongoDB)
+  # ---------------------------------------------------
+  mongodb:
+    image: mongo:6.0 # Atualizado para versão mais recente LTS
+    container_name: codata-mongodb
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - codata-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------
+  # 3. APLICAÇÃO CODATA (Next.js Fullstack)
+  # ---------------------------------------------------
+  codata-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codata-app
+    restart: always
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - codata-net
+    env_file:
+      - .env
+    environment:
+      # O Next.js acessa o Mongo pelo nome do container interno!
+      - MONGODB_URI=mongodb://mongodb:27017/codata_db 
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.codata-app.entrypoints=websecure"
+      # 👇 DOMÍNIO OFICIAL
+      - "traefik.http.routers.codata-app.rule=Host(`codata.prefeitura.sp.gov.br`)"
+      - "traefik.http.routers.codata-app.tls.certresolver=certificadofront"
+      - "traefik.http.services.codata-app.loadbalancer.server.port=3000"
+
+networks:
+  codata-net:
+    driver: bridge
+
+volumes:
+  traefik-data:
+  mongo_data:
