@@ -1,32 +1,44 @@
-import { cookies } from 'next/headers'
-import { listUnifiedAgenda } from '@/modules/agenda/application/list'
-import { AgendaRepo } from '@/modules/agenda/infra/repo'
-import { ProjectRepo } from '@/modules/projects/infra/repo'
 import { TaskRepo } from '@/modules/tasks/infra/repo'
-import { UserRepo } from '@/modules/users/infra/repo'
-import { AgendaList } from '@/modules/agenda/ui/list'
-import { SESSION_COOKIE } from '@/core/security/cookie'
-import { readSessionToken } from '@/core/security/session'
-import { generateFeedToken } from '@/core/security/feed-token'
+import { AgendaClient, AgendaTask } from './components/agenda-client'
+
+async function getAgendaTasks(): Promise<AgendaTask[]> {
+  const taskRepo = new TaskRepo()
+
+  try {
+    // Traz todas as tarefas
+    const allTasks = await taskRepo.list()
+
+    // Filtra: Queremos apenas tarefas que possuem uma data de vencimento (dueDate)
+    const tasksWithDates = allTasks.filter(task => task.dueDate !== null && task.dueDate !== undefined)
+
+    // Formata os dados para o Client Component
+    const formattedTasks: AgendaTask[] = tasksWithDates.map(task => {
+      // Pega o objeto Date do MongoDB e converte para string "YYYY-MM-DD"
+      // Isso evita problemas de fuso horário no calendário do Front-end
+      const dateObj = new Date(task.dueDate as Date)
+      const year = dateObj.getFullYear()
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+      const day = String(dateObj.getDate()).padStart(2, '0')
+
+      return {
+        id: task.id,
+        title: task.title,
+        status: task.status as any,
+        priority: task.priority as any,
+        dueDate: `${year}-${month}-${day}` // String limpa para matemática no frontend
+      }
+    })
+
+    return formattedTasks
+
+  } catch (error) {
+    console.error('Erro ao buscar tarefas para a agenda:', error)
+    return []
+  }
+}
 
 export default async function AgendaPage() {
-  const agendaRepo = new AgendaRepo()
-  const projectRepo = new ProjectRepo()
-  const taskRepo = new TaskRepo()
-  const userRepo = new UserRepo()
+  const tasksForAgenda = await getAgendaTasks()
 
-  const cookieStore = await cookies()
-  const sessionValue = cookieStore.get(SESSION_COOKIE)?.value
-  const session = readSessionToken(sessionValue)
-  
-  const feedToken = session ? generateFeedToken(session.userId) : ''
-  
-  // Buscar os dados do usuário atual para ler a URL do calendário dele
-  const currentUser = session ? await userRepo.findById(session.userId) : null
-  const externalUrl = currentUser?.externalCalendarUrl || null
-
-  // Agora passamos a URL externa para a função misturar os eventos
-  const items = await listUnifiedAgenda(agendaRepo, projectRepo, taskRepo, externalUrl)
-
-  return <AgendaList items={items} feedToken={feedToken} initialExternalUrl={externalUrl} />
+  return <AgendaClient tasks={tasksForAgenda} />
 }

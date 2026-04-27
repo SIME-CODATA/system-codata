@@ -4,6 +4,8 @@ export const TASK_STATUS = [
   'concluida',
   'bloqueada',
   'cancelada',
+  'atrasado',
+  'naoIniciado',
 ] as const
 
 export const TASK_PRIORITY = [

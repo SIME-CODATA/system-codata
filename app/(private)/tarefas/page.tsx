@@ -1,9 +1,9 @@
 import { listTasks } from '@/modules/tasks/application/list'
 import { TaskRepo } from '@/modules/tasks/infra/repo'
-import { TaskTable } from '@/modules/tasks/ui/table'
-import { TaskFilters } from '@/modules/tasks/ui/filters'
 import { ProjectRepo } from '@/modules/projects/infra/repo'
 import { UserRepo } from '@/modules/users/infra/repo'
+import { TarefasClient } from './components/tarefas-client'
+import type { TaskStatus, TaskPriority } from '@/modules/tasks/domain/task'
 
 export default async function TasksPage({
   searchParams,
@@ -23,19 +23,8 @@ export default async function TasksPage({
 
   const [tasks, projects, users] = await Promise.all([
     listTasks(taskRepo, projectRepo, userRepo, {
-      status: params.status as
-        | 'pendente'
-        | 'emAndamento'
-        | 'concluida'
-        | 'bloqueada'
-        | 'cancelada'
-        | undefined,
-      priority: params.priority as
-        | 'baixa'
-        | 'media'
-        | 'alta'
-        | 'urgente'
-        | undefined,
+      status: params.status as TaskStatus | undefined,
+      priority: params.priority as TaskPriority | undefined,
       projectId: params.projectId || undefined,
       assigneeId: params.assigneeId || undefined,
     }),
@@ -43,24 +32,16 @@ export default async function TasksPage({
     userRepo.list(),
   ])
 
-  return (
-    <div>
-      <TaskFilters
-        projects={projects.map((project) => ({
-          id: project.id,
-          name: project.name,
-        }))}
-        users={users.map((user) => ({
-          id: user.id,
-          name: user.name,
-        }))}
-        currentStatus={params.status}
-        currentPriority={params.priority}
-        currentProjectId={params.projectId}
-        currentAssigneeId={params.assigneeId}
-      />
+  // Formata os dados para o Client Component
+  const projectsDropdown = projects.map(p => ({ id: p.id, name: p.name }))
+  const usersDropdown = users.map(u => ({ id: u.id, name: u.name }))
 
-      <TaskTable tasks={tasks} />
-    </div>
+  return (
+    <TarefasClient 
+      tasks={tasks} 
+      projects={projectsDropdown} 
+      users={usersDropdown} 
+      params={params} 
+    />
   )
 }

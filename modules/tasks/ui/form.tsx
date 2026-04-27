@@ -3,38 +3,46 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Option = {
+// 1. TIPAGEM ESTRITA DEFINIDA (Adeus, any!)
+export type TaskStatus = 'pendente' | 'emAndamento' | 'concluida' | 'bloqueada' | 'cancelada'
+export type TaskPriority = 'baixa' | 'media' | 'alta' | 'urgente'
+
+export type SelectOption = {
   id: string
   name: string
 }
 
+export type TaskData = {
+  id: string
+  title: string
+  description: string
+  projectId: string
+  assigneeId: string
+  status: TaskStatus
+  priority: TaskPriority
+  dueDate: string | null
+}
+
 type TaskFormProps = {
-  task: {
-    id: string
-    title: string
-    description: string
-    projectId: string
-    assigneeId: string
-    status: string
-    priority: string
-    dueDate: string | null
-  }
-  projects: Option[]
-  users: Option[]
+  task: TaskData
+  projects: SelectOption[]
+  users: SelectOption[]
 }
 
 export function TaskForm({ task, projects, users }: TaskFormProps) {
   const router = useRouter()
 
-  const [title, setTitle] = useState(task.title)
-  const [description, setDescription] = useState(task.description)
-  const [projectId, setProjectId] = useState(task.projectId)
-  const [assigneeId, setAssigneeId] = useState(task.assigneeId)
-  const [status, setStatus] = useState(task.status)
-  const [priority, setPriority] = useState(task.priority)
-  const [dueDate, setDueDate] = useState(task.dueDate ?? '')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  // Estados controlados do formulário
+  const [title, setTitle] = useState<string>(task.title)
+  const [description, setDescription] = useState<string>(task.description)
+  const [projectId, setProjectId] = useState<string>(task.projectId)
+  const [assigneeId, setAssigneeId] = useState<string>(task.assigneeId)
+  const [status, setStatus] = useState<TaskStatus>(task.status)
+  const [priority, setPriority] = useState<TaskPriority>(task.priority)
+  const [dueDate, setDueDate] = useState<string>(task.dueDate ?? '')
+  
+  const [error, setError] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -56,7 +64,7 @@ export function TaskForm({ task, projects, users }: TaskFormProps) {
         }),
       })
 
-      const data = await response.json()
+      const data: { error?: string } = await response.json()
 
       if (!response.ok) {
         setError(data.error ?? 'Falha ao atualizar tarefa.')
@@ -65,7 +73,7 @@ export function TaskForm({ task, projects, users }: TaskFormProps) {
 
       router.push('/tarefas')
       router.refresh()
-    } catch {
+    } catch (err: unknown) {
       setError('Erro inesperado ao atualizar tarefa.')
     } finally {
       setLoading(false)
@@ -73,101 +81,156 @@ export function TaskForm({ task, projects, users }: TaskFormProps) {
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ maxWidth: 720 }}>
-      <h1>Editar tarefa</h1>
+    <div className="max-w-3xl mx-auto mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <form 
+        onSubmit={onSubmit} 
+        className="bg-surface border border-black/5 dark:border-white/5 rounded-2xl shadow-lg overflow-hidden"
+      >
+        {/* CABEÇALHO */}
+        <div className="px-6 py-5 border-b border-black/5 dark:border-white/5 bg-background/50 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <i className="fa-solid fa-pen-to-square text-primary"></i> 
+            Editar Tarefa
+          </h1>
+          <span className="text-xs font-bold px-2 py-1 bg-black/5 dark:bg-white/5 text-muted rounded-md uppercase tracking-wider">
+            ID: {task.id.slice(-6)}
+          </span>
+        </div>
 
-      <div style={{ marginBottom: 12 }}>
-        <label>Título</label>
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          style={{ width: '100%' }}
-        />
-      </div>
+        {/* CORPO DO FORMULÁRIO (GRID) */}
+        <div className="p-6 md:p-8 flex flex-col gap-6">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Título - Ocupa 2 colunas */}
+            <div className="md:col-span-2">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-2">Título da Tarefa</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="w-full p-3 bg-background border border-black/10 dark:border-white/10 rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              />
+            </div>
 
-      <div style={{ marginBottom: 12 }}>
-        <label>Descrição</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          style={{ width: '100%', minHeight: 100 }}
-        />
-      </div>
+            {/* Projeto */}
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-2">Vincular Projeto</label>
+              <select
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+                required
+                className="w-full p-3 bg-background border border-black/10 dark:border-white/10 rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              >
+                <option value="" disabled>Selecione um projeto...</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>{project.name}</option>
+                ))}
+              </select>
+            </div>
 
-      <div style={{ marginBottom: 12 }}>
-        <label>Projeto</label>
-        <select
-          value={projectId}
-          onChange={(e) => setProjectId(e.target.value)}
-          style={{ width: '100%' }}
-        >
-          {projects.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.name}
-            </option>
-          ))}
-        </select>
-      </div>
+            {/* Responsável */}
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-2">Responsável</label>
+              <select
+                value={assigneeId}
+                onChange={(e) => setAssigneeId(e.target.value)}
+                className="w-full p-3 bg-background border border-black/10 dark:border-white/10 rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              >
+                <option value="">Não atribuído</option>
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>{user.name}</option>
+                ))}
+              </select>
+            </div>
 
-      <div style={{ marginBottom: 12 }}>
-        <label>Responsável</label>
-        <select
-          value={assigneeId}
-          onChange={(e) => setAssigneeId(e.target.value)}
-          style={{ width: '100%' }}
-        >
-          {users.map((user) => (
-            <option key={user.id} value={user.id}>
-              {user.name}
-            </option>
-          ))}
-        </select>
-      </div>
+            {/* Status */}
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-2">Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                className="w-full p-3 bg-background border border-black/10 dark:border-white/10 rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              >
+                <option value="pendente">Pendente</option>
+                <option value="emAndamento">Em andamento</option>
+                <option value="concluida">Concluída</option>
+                <option value="bloqueada">Bloqueada</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
+            </div>
 
-      <div style={{ marginBottom: 12 }}>
-        <label>Status</label>
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          style={{ width: '100%' }}
-        >
-          <option value="pendente">Pendente</option>
-          <option value="emAndamento">Em andamento</option>
-          <option value="concluida">Concluída</option>
-          <option value="bloqueada">Bloqueada</option>
-          <option value="cancelada">Cancelada</option>
-        </select>
-      </div>
+            {/* Prioridade */}
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-2">Prioridade</label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as TaskPriority)}
+                className="w-full p-3 bg-background border border-black/10 dark:border-white/10 rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              >
+                <option value="baixa">Baixa</option>
+                <option value="media">Média</option>
+                <option value="alta">Alta</option>
+                <option value="urgente">Urgente 🔥</option>
+              </select>
+            </div>
 
-      <div style={{ marginBottom: 12 }}>
-        <label>Prioridade</label>
-        <select
-          value={priority}
-          onChange={(e) => setPriority(e.target.value)}
-          style={{ width: '100%' }}
-        >
-          <option value="baixa">Baixa</option>
-          <option value="media">Média</option>
-          <option value="alta">Alta</option>
-          <option value="urgente">Urgente</option>
-        </select>
-      </div>
+            {/* Prazo */}
+            <div className="md:col-span-2">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-2">Prazo Final</label>
+              <input
+                type="date"
+                value={dueDate ? dueDate.slice(0, 10) : ''}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full md:w-1/2 p-3 bg-background border border-black/10 dark:border-white/10 rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              />
+            </div>
 
-      <div style={{ marginBottom: 12 }}>
-        <label>Prazo</label>
-        <input
-          type="date"
-          value={dueDate ? dueDate.slice(0, 10) : ''}
-          onChange={(e) => setDueDate(e.target.value)}
-          style={{ width: '100%' }}
-        />
-      </div>
+            {/* Descrição - Ocupa 2 colunas */}
+            <div className="md:col-span-2">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-2">Descrição</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+                rows={4}
+                className="w-full p-3 bg-background border border-black/10 dark:border-white/10 rounded-xl text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              />
+            </div>
+          </div>
 
-      {error ? <p style={{ color: 'crimson' }}>{error}</p> : null}
+          {/* MENSAGEM DE ERRO */}
+          {error && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 text-sm font-bold">
+              <i className="fa-solid fa-circle-exclamation"></i>
+              {error}
+            </div>
+          )}
+        </div>
 
-      <button type="submit" disabled={loading}>
-        {loading ? 'Salvando...' : 'Salvar alterações'}
-      </button>
-    </form>
+        {/* RODAPÉ E BOTÕES */}
+        <div className="px-6 py-4 border-t border-black/5 dark:border-white/5 bg-background/50 flex gap-3 justify-end items-center">
+          <button 
+            type="button" 
+            onClick={() => router.push('/tarefas')}
+            className="px-6 py-3 bg-transparent text-muted hover:text-foreground text-sm font-bold rounded-xl transition-colors"
+          >
+            Cancelar
+          </button>
+          
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="px-8 py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-md hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+          >
+            {loading ? (
+              <><i className="fa-solid fa-spinner animate-spin"></i> Salvando...</>
+            ) : (
+              'Salvar Alterações'
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
   )
 }
