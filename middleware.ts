@@ -12,7 +12,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/tarefas') ||
     pathname.startsWith('/avisos') ||
     pathname.startsWith('/agenda') ||
-    pathname.startsWith('/perfil')
+    pathname.startsWith('/perfil') ||
+    pathname.startsWith('/planner')
 
   const isLoginRoute = pathname.startsWith('/login')
 
@@ -36,6 +37,7 @@ export const config = {
     '/avisos/:path*',
     '/agenda/:path*',
     '/perfil/:path*',
+    '/planner/:path*',
     '/login',
   ],
 }

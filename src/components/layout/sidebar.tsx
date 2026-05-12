@@ -31,6 +31,9 @@ export function Sidebar({ userRole }: SidebarProps) {
     { href: '/avisos', label: 'Quadro de Avisos', icon: (
       <i className="fa-solid fa-thumbtack "></i>
     )},
+    { href: '/planner', label: 'Microsoft Planner', icon: (
+        <i className="fa-brands fa-microsoft"></i>
+    )},
   ]
 
   // Menus Administrativos (Só aparecem se for admin)
@@ -113,7 +116,7 @@ export function Sidebar({ userRole }: SidebarProps) {
           </div>
         )}
         {/* alinhado ao final DA SIDEBAR (Logout) */}
-        <div className='border-black dark:border-white mt-auto pt-4 border-t gap-2 flex flex-col justify-end h-48'>
+        <div className='border-black dark:border-white mt-auto pt-4 border-t gap-2 flex flex-col justify-end'>
             <Link  href="../../../../api/auth/logout"  className={`flex items-center h-12 rounded-lg text-muted hover:bg-red-500/10 hover:text-red-500 transition-colors overflow-hidden ${isExpanded ? 'px-3 justify-start' : 'justify-center relative top-8'}`}title="Sair do Sistema">
                 <i className="fa-solid fa-power-off"></i>
                 {isExpanded && <span className="ml-3 text-sm font-medium whitespace-nowrap">Encerrar Sessão</span>}
