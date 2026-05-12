@@ -1,7 +1,8 @@
 import { createHmac, timingSafeEqual } from 'crypto'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+import { cookies } from 'next/headers'
 import { env } from '@/core/config/env'
-import { SESSION_COOKIE, SESSION_MAX_AGE } from './cookie'
+import { SESSION_COOKIE } from './cookie'
 import type { UserRole } from '@/modules/users/domain/user'
 
 export type SessionData = {
@@ -20,7 +21,7 @@ export function createSessionToken(userId: string, role: UserRole) {
   const payload: SessionData = {
     userId,
     role,
-    exp: Math.floor(Date.now() / 1000) + SESSION_MAX_AGE,
+    exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24), 
   }
 
   const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url')
@@ -56,20 +57,22 @@ export function getSession(request: NextRequest) {
   return readSessionToken(token)
 }
 
-export function setSessionCookie(response: NextResponse, token: string) {
-  response.cookies.set({
+export async function setSessionCookie(token: string) {
+  const cookieStore = await cookies()
+  cookieStore.set({
     name: SESSION_COOKIE,
     value: token,
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production', 
     path: '/',
-    maxAge: SESSION_MAX_AGE,
+    maxAge: 60 * 60 * 24, 
   })
 }
 
-export function clearSessionCookie(response: NextResponse) {
-  response.cookies.set({
+export async function clearSessionCookie() {
+  const cookieStore = await cookies()
+  cookieStore.set({
     name: SESSION_COOKIE,
     value: '',
     httpOnly: true,

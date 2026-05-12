@@ -1,25 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { signIn } from '@/modules/auth/application/sign-in'
+import { NextResponse } from 'next/server'
 import { UserRepo } from '@/modules/users/infra/repo'
+import { signIn } from '@/modules/auth/application/sign-in'
 import { setSessionCookie } from '@/core/security/session'
+import { connectMongo } from '@/core/database/mongo'
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
+    await connectMongo()
     const body = await request.json()
-
     const repo = new UserRepo()
-    const result = await signIn(repo, {
-      email: body.email ?? '',
-      password: body.password ?? '',
-    })
+    const result = await signIn(repo, body)
+    await setSessionCookie(result.token)
+    return NextResponse.json({ success: true, user: result.user })
 
-    const response = NextResponse.json({ user: result.user })
-    setSessionCookie(response, result.token)
-
-    return response
-  } catch (error) {
+  } catch (error: unknown | any) {
+    console.error("Erro no login:", error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Falha no login.' },
+      { error: error.message || 'Falha no login. Verifique as credenciais.' }, 
       { status: 401 }
     )
   }
